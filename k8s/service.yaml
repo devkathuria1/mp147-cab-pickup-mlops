@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mp147-svc
+spec:
+  selector:
+    app: mp147-api
+  ports:
+    - port: 80
+      targetPort: 8000
