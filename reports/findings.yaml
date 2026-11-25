@@ -43,13 +43,13 @@ tracking:
 
 monitoring:
   psi:                     # cleaned train.csv vs later.csv, 10 bins
-    drivers_nearby: null
-    distance_to_driver_km: null
-    hour: null
-    rain_mm: null
-    surge: null
-    road_closures: null
-  most_drifted_feature: null
+    drivers_nearby: 0.0498
+    distance_to_driver_km: 0.022
+    hour: 0.0296
+    rain_mm: 3.3495
+    surge: 0.04
+    road_closures: 0.0174
+  most_drifted_feature: "rain_mm"
   mae_by_group:            # v1 on later.csv, per value of zone
     'Airport': null
     'Old City': null
