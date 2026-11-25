@@ -1,0 +1,17 @@
+data:
+  train_path: data/raw/train.csv
+  later_path: data/raw/later.csv
+  holdout_path: data/raw/holdout_features.csv
+
+model:
+  random_state: 42
+  test_size: 0.2
+  model_path: models/model.joblib
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment_name: mp147-pickup-eta
+  registered_model_name: mp147-pickup-eta-model
+
+output:
+  predictions_path: predictions/holdout_predictions.csvdir params.yaml
