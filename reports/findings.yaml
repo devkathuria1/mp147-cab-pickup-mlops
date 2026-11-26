@@ -35,7 +35,7 @@ tracking:
   experiment_name: "mp147-pickup-eta"
   best_run_id: "13b257fa264f4c12bf0a4dcff76f28d0"
   registered_model_name: "mp147-pickup-eta-model"
-  champion_version: null
+  champion_version: 2
 
 monitoring:
   psi:
@@ -51,6 +51,6 @@ monitoring:
     'Old City': 1.2792
     'Tech Park': 9.5173
   worst_served_group: "Tech Park"
-  mae_v1_on_check: null
-  mae_v2_on_check: null
-  decision: null
+  mae_v1_on_check: 3.7353
+  mae_v2_on_check: 1.2991
+  decision: "promote"
