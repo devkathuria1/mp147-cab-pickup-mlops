@@ -14,4 +14,4 @@ mlflow:
   registered_model_name: mp147-pickup-eta-model
 
 output:
-  predictions_path: predictions/holdout_predictions.csvdir params.yaml
+   predictions_path: predictions/holdout_predictions.csv
