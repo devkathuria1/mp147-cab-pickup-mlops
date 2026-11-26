@@ -1,8 +1,13 @@
+import json
+import logging
 import os
+import sys
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import joblib
 import pandas as pd
+import yaml
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from sklearn.dummy import DummyRegressor
@@ -12,8 +17,31 @@ FEATURES = [
     "drivers_nearby", "distance_to_driver_km", "hour", "rain_mm",
     "surge", "road_closures", "car_type", "zone",
 ]
+ROOT = Path(__file__).resolve().parent.parent
 
 
+# ---------- JSON logging ----------
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        entry = {
+            "time": self.formatTime(record, "%Y-%m-%dT%H:%M:%S"),
+            "level": record.levelname,
+            "message": record.getMessage(),
+        }
+        entry.update(getattr(record, "fields", {}))   # extra fields passed by us
+        return json.dumps(entry)
+
+
+logger = logging.getLogger("mp147.api")
+logger.setLevel(logging.INFO)
+logger.propagate = False
+if not logger.handlers:
+    handler = logging.StreamHandler(sys.stdout)       # stdout, never a file
+    handler.setFormatter(JsonFormatter())
+    logger.addHandler(handler)
+
+
+# ---------- request schema (the 2 client rules live here) ----------
 class PredictRequest(BaseModel):
     drivers_nearby: int = Field(..., ge=0)
     distance_to_driver_km: float = Field(..., ge=0)   # client rule 2
@@ -25,8 +53,8 @@ class PredictRequest(BaseModel):
     zone: str
 
 
+# ---------- model loading ----------
 def make_dummy_model():
-    """Temporary model: always predicts 12 minutes. Replaced by Vedika's model on Thursday."""
     X = pd.DataFrame(
         [[1, 1.0, 8, 0.0, 1.0, 0, "mini", "Airport"],
          [2, 2.0, 9, 1.0, 1.2, 1, "sedan", "Old City"]],
@@ -37,16 +65,31 @@ def make_dummy_model():
     return model
 
 
+def model_path_from_params():
+    params_file = ROOT / "params.yaml"
+    if not params_file.exists():
+        return None
+    with open(params_file) as f:
+        params = yaml.safe_load(f)
+    return ROOT / params["model"]["model_path"]
+
+
 def load_model():
-    path = os.environ.get("MODEL_PATH")
+    path = os.environ.get("MODEL_PATH")                # 1) env var (tests use this)
     if path and os.path.exists(path):
+        logger.info("model loaded", extra={"fields": {"source": "MODEL_PATH"}})
         return joblib.load(path)
-    return make_dummy_model()
+    path = model_path_from_params()                    # 2) path from params.yaml
+    if path is not None and path.exists():
+        logger.info("model loaded", extra={"fields": {"source": "params.yaml"}})
+        return joblib.load(path)
+    logger.warning("model file not found, using dummy model")
+    return make_dummy_model()                          # 3) dummy fallback
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.model = load_model()   # runs once when the server starts
+    app.state.model = load_model()
     yield
 
 
@@ -60,6 +103,8 @@ def health():
 
 @app.post("/predict")
 def predict(req: PredictRequest):
-    row = pd.DataFrame([req.model_dump()], columns=FEATURES)
-    pred = app.state.model.predict(row)
-    return {"prediction": float(pred[0])}
+    data = req.model_dump()
+    row = pd.DataFrame([data], columns=FEATURES)
+    prediction = float(app.state.model.predict(row)[0])
+    logger.info("prediction", extra={"fields": {**data, "prediction": prediction}})
+    return {"prediction": prediction}

@@ -1,3 +1,6 @@
+import io
+import json
+import logging
 import joblib
 import pandas as pd
 import pytest
@@ -74,3 +77,20 @@ def test_predict_negative_distance_returns_422(client):
     body = {**VALID_BODY, "distance_to_driver_km": -1}
     response = client.post("/predict", json=body)
     assert response.status_code == 422
+    
+def test_prediction_is_logged_as_json(client):
+    stream = io.StringIO()
+    handler = logging.StreamHandler(stream)
+    from app.main import JsonFormatter, logger
+    handler.setFormatter(JsonFormatter())
+    logger.addHandler(handler)
+    try:
+        client.post("/predict", json=VALID_BODY)
+    finally:
+        logger.removeHandler(handler)
+
+    line = stream.getvalue().strip().splitlines()[-1]
+    entry = json.loads(line)              # must be valid JSON
+    assert entry["message"] == "prediction"
+    assert entry["zone"] == "Airport"
+    assert "prediction" in entry
