@@ -31,3 +31,14 @@ def mae_by_group(model, df, group_col=GROUP_COL):
         m = (df[group_col] == g).to_numpy()
         out[g] = round(float(np.abs(err[m]).mean()), 4)
     return out
+
+def split_later(later_sorted, frac=0.7):
+    """later_sorted must already be sorted by date (load_later does that)."""
+    n = int(len(later_sorted) * frac)          # 300 rows -> 210 / 90
+    return later_sorted.iloc[:n].copy(), later_sorted.iloc[n:].copy()
+
+
+def decide(mae_v1, mae_v2, min_gain=0.12):
+    """Promote v2 only if its MAE is at least 12% lower than v1's."""
+    gain = (mae_v1 - mae_v2) / mae_v1
+    return ("promote" if gain >= min_gain else "keep"), round(gain, 4)
