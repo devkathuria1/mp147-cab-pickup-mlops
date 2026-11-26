@@ -36,13 +36,13 @@ data_issues:
     true_levels: 3
   
 tracking:
-  experiment_name: null
-  best_run_id: null        # the MLflow run id of your v1 model
-  registered_model_name: null
+  experiment_name: "mp147-pickup-eta"
+  best_run_id: "13b257fa264f4c12bf0a4dcff76f28d0"
+  registered_model_name: "mp147-pickup-eta-model"
   champion_version: null
 
 monitoring:
-  psi:                     # cleaned train.csv vs later.csv, 10 bins
+  psi:
     drivers_nearby: 0.0498
     distance_to_driver_km: 0.022
     hour: 0.0296
@@ -50,11 +50,11 @@ monitoring:
     surge: 0.04
     road_closures: 0.0174
   most_drifted_feature: "rain_mm"
-  mae_by_group:            # v1 on later.csv, per value of zone
-    'Airport': null
-    'Old City': null
-    'Tech Park': null
-  worst_served_group: null
-  mae_v1_on_check: null    # v1 on the last 30% of later.csv (by date)
-  mae_v2_on_check: null    # v2 on the same rows
-  decision: null           # promote or keep
+  mae_by_group:
+    'Airport': 1.0749
+    'Old City': 1.2792
+    'Tech Park': 9.5173
+  worst_served_group: "Tech Park"
+  mae_v1_on_check: null
+  mae_v2_on_check: null
+  decision: null
