@@ -1,8 +1,4 @@
-# MP147 findings --- fill in every value, keep every key.
-# The marking tool reads this file. Write null only where the comment says so.
-# Use the exact column names and group values from your data files.
-
-group_id: "G103"          # your group id, e.g. "G042"
+group_id: "G103"
 problem_id: "MP147"
 
 data_issues:
@@ -34,7 +30,7 @@ data_issues:
     present: true
     column: "car_type"
     true_levels: 3
-  
+
 tracking:
   experiment_name: "mp147-pickup-eta"
   best_run_id: "13b257fa264f4c12bf0a4dcff76f28d0"
